@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
 
         const roomData = io.sockets.adapter.rooms.get(room);
         const inRoomCount = roomData.size;
-        if (inRoomCount > 8) {
+        if (inRoomCount > 5) {
             socket.leave(room);
             socket.emit('room-full');
         }
@@ -54,15 +54,15 @@ io.on('connection', (socket) => {
         io.in(room).emit('new-chat-message', { username: username, message: message });
     })
 
-    socket.on('quiz-start', (questions) => {
+    socket.on('quiz-start', ({questions, quiz}) => {
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        io.in(room).emit('quiz-questions', questions);
+        socket.in(room).emit('quiz-questions', {questions, quiz});
     })
 
     socket.on('quiz-finished', (score) => {
         const username = socketUsernames[socket.id];
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        socket.in(room).emit('player-score', { username: username, score: score });
+        io.in(room).emit('player-score', { username: username, score: score });
     })
 })
 
