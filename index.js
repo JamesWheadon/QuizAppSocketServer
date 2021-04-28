@@ -31,16 +31,21 @@ io.on('connection', (socket) => {
 
     socket.on('request-join-game', ({ room, username }) => {
         socketUsernames[socket.id] = username;
-        socket.join(room)
+        socket.join(room);
 
         const roomData = io.sockets.adapter.rooms.get(room);
-        const inRoomCount = roomData.size
-        let roomUsernames = [];
-        for (const user of roomData) {
-            roomUsernames.push(socketUsernames[user])
+        const inRoomCount = roomData.size;
+        if (inRoomCount > 8) {
+            socket.leave(room);
+            socket.emit('room-full');
         }
-        io.in(room).emit('all-players', { roomUsernames })
-        io.in(room).emit('admin-message', `${inRoomCount} players now in ${room}!`)
+        else {
+            let roomUsernames = [];
+            for (const user of roomData) {
+                roomUsernames.push(socketUsernames[user]);
+            }
+            io.in(room).emit('all-players', { roomUsernames });
+        }
     })
 
     socket.on('chat-message', (message) => {
