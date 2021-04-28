@@ -4,7 +4,8 @@
   "description": "* Emmanueal\r * Faisal\r * James\r * Rishi\r * Ryan",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
