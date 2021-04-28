@@ -49,6 +49,11 @@ io.on('connection', (socket) => {
         io.in(room).emit('new-chat-message', { username: username, message: message });
     })
 
+    socket.on('quiz-start', (questions) => {
+        const room = [...socket.rooms].filter(r => r != socket.id)[0];
+        io.in(room).emit('quiz-questions', questions);
+    })
+
     socket.on('quiz-finished', (score) => {
         const username = socketUsernames[socket.id];
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
