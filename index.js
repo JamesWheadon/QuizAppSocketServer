@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
     res.send('Socket is listening');
 });
 
-let socketUsernames = {};
+let socketUsers = {};
 
 io.on('connection', (socket) => {
     console.log('a user connected');
@@ -23,28 +23,28 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('admin-message', `A new friend has arrived!`)
 
     socket.on('disconnect', () => {
-        if (socket.id in socketUsernames) {
-            delete socketUsernames[socket.id];
+        if (socket.id in socketUsers) {
+            delete socketUsers[socket.id];
         }
         console.log('user disconnected');
     });
 
-    socket.on('request-join-game', ({ room, username }) => {
-        socketUsernames[socket.id] = username;
+    socket.on('request-join-game', ({ user, room }) => {
+        socketUsers[socket.id] = user;
         socket.join(room)
 
         const roomData = io.sockets.adapter.rooms.get(room);
         const inRoomCount = roomData.size
-        let roomUsernames = [];
+        let roomUsers = [];
         for (const user of roomData) {
-            roomUsernames.push(socketUsernames[user])
+            roomUsers.push(socketUsers[user])
         }
-        io.in(room).emit('all-players', { roomUsernames })
+        io.in(room).emit('all-players',  roomUsers )
         io.in(room).emit('admin-message', `${inRoomCount} players now in ${room}!`)
     })
 
     socket.on('chat-message', (message) => {
-        const username = socketUsernames[socket.id];
+        const username = socketUsers[socket.id].name;
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
         io.in(room).emit('new-chat-message', { username: username, message: message });
     })
