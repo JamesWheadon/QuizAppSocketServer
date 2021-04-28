@@ -12,7 +12,7 @@ const options = {
 const io = socketio(server, options);
 
 app.get('/', (req, res) => {
-    res.sendFile('Socket is listening');
+    res.send('Socket is listening');
 });
 
 let socketUsernames = {};
