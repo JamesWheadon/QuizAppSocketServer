@@ -25,25 +25,35 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('request-join-game', ({ room, user }) => {
+    socket.on('request-join-game', ({ user, room }) => {
+        console.log(room, user)
         const roomData = io.sockets.adapter.rooms.get(room);
         let roomUsers = [];
-        let roomUsernames = [];
-        for (const user of roomData) {
-            roomUsers.push(socketUsers[user])
-            roomUsernames.push(socketUsers[user].name);
-        }
-        const inRoomCount = roomData.size;
-        if (inRoomCount == 5) {
-            socket.emit('room-full');
-        }
-        else if (roomUsernames.contains(user.name)) {
-            socket.emit('taken-username');
+        if (roomData) {
+            let roomUsernames = [];
+            for (const user of roomData) {
+                roomUsers.push(socketUsers[user])
+                roomUsernames.push(socketUsers[user].name);
+            }
+            const inRoomCount = roomData.size;
+            if (inRoomCount == 5) {
+                socket.emit('room-full');
+            }
+            else if (roomUsernames.includes(user.name)) {
+                socket.emit('taken-username');
+            }
+            else {
+                socketUsers[socket.id] = user;
+                roomUsers.push(user)
+                socket.join(room);
+                io.in(room).emit('all-players', roomUsers);
+            }
         }
         else {
             socketUsers[socket.id] = user;
             socket.join(room);
-            io.in(room).emit('all-players', roomUsernames);
+            roomUsers = [user];
+            io.in(room).emit('all-players', roomUsers);
         }
     })
 
@@ -53,9 +63,9 @@ io.on('connection', (socket) => {
         io.in(room).emit('new-chat-message', { username: user.name, message: message });
     })
 
-    socket.on('quiz-start', ({questions, quiz}) => {
+    socket.on('quiz-start', ({ questions, quiz }) => {
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        socket.in(room).emit('quiz-questions', {questions, quiz});
+        socket.in(room).emit('quiz-questions', { questions, quiz });
     })
 
     socket.on('quiz-finished', (score) => {
