@@ -1,12 +1,12 @@
 let socketUsers = {};
 
-export function disconnect(socket) {
+function disconnect(socket) {
     if (socket.id in socketUsers) {
         delete socketUsers[socket.id];
     }
 };
 
-export function requestJoinGame(user, room, roomData) {
+function requestJoinGame(user, socket, roomData) {
     let roomUsers = [];
     if (roomData) {
         let roomUsernames = [];
@@ -34,19 +34,21 @@ export function requestJoinGame(user, room, roomData) {
     }
 }
 
-export function chatMessage(message, socket) {
+function chatMessage(message, socket) {
     const user = socketUsers[socket.id];
     const room = [...socket.rooms].filter(r => r != socket.id)[0];
     return { msg: 'new-chat-message', data: { username: user.name, message: message }, room: room };
 }
 
-export function quizStart(questions, quiz, socket) {
+function quizStart(questions, quiz, socket) {
     const room = [...socket.rooms].filter(r => r != socket.id)[0];
     return { msg: 'quiz-questions', data: { questions, quiz }, room: room };
 }
 
-export function quizFinished(score, socket) {
+function quizFinished(score, socket) {
     const user = socketUsers[socket.id];
     const room = [...socket.rooms].filter(r => r != socket.id)[0];
     return { msg: 'player-score', data: { username: user.name, score: score }, room: room };
 }
+
+module.exports = { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished }

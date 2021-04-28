@@ -4,12 +4,11 @@ const http = require("http")
 const server = http.createServer(app);
 const socketio = require("socket.io");
 
-import { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } from './helper';
+const { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } =require('./helper');
 
 const options = {
     cors: {
-        origin: "http://localhost:8080",
-        methods: ["GET", "POST"]
+        origin: "http://localhost:8080"
     }
 };
 const io = socketio(server, options);
@@ -26,7 +25,8 @@ io.on('connection', (socket) => {
 
     socket.on('request-join-game', ({ user, room }) => {
         const roomData = io.sockets.adapter.rooms.get(room);
-        const joinData = requestJoinGame(user, room, roomData);
+        const joinData = requestJoinGame(user, socket, roomData);
+        console.log(joinData)
         if (joinData.data) {
             socket.join(room);
             io.in(room).emit(joinData.msg, joinData.data)
@@ -37,16 +37,19 @@ io.on('connection', (socket) => {
 
     socket.on('chat-message', (message) => {
         const messageData = chatMessage(message, socket);
+        console.log(messageData);
         io.in(messageData.room).emit(messageData.msg, messageData.data);
     })
 
     socket.on('quiz-start', ({ questions, quiz }) => {
         const startData = quizStart(questions, quiz, socket);
-        socket.in(startData.room).emit(startData.msg, startData.msg);
+        console.log(startData);
+        socket.in(startData.room).emit(startData.msg, startData.data);
     })
 
     socket.on('quiz-finished', (score) => {
         const finishedData = quizFinished(score, socket);
+        console.log(finishedData);
         io.in(finishedData.room).emit(finishedData.msg, finishedData.data);
     })
 })
@@ -54,5 +57,3 @@ io.on('connection', (socket) => {
 const port = process.env.PORT || 5001;
 
 server.listen(port, () => console.log(`Sockets listening on port ${port}!`))
-
-module.exports = { io, server, options };
