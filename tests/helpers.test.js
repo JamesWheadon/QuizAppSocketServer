@@ -51,3 +51,15 @@ describe('disconnect', () => {
         expect(result).toBe(false);
     });
 });
+
+describe('chatMessage', () => {
+    test('it returns an object with the message and username', () => {
+        const socket = { rooms: new Set(["testRoom", "testId"]), id: "existingTestId" };
+        const message = "testMessage";
+        const result = chatMessage(message, socket);
+        expect(result.msg).toBe("new-chat-message");
+        expect(result.data.message).toBe("testMessage");
+        expect(result.data.username).toBe("takenName");
+        expect(result.room).toBe("testRoom");
+    });
+});
