@@ -2,12 +2,42 @@ const { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } = re
 
 describe('requestJoinGame', () => {
     test('it adds a user to a new room', () => {
-        const user = {username: "test"};
+        const user = {name: "test"};
         const socket = {id: "testId"};
         const roomData = undefined;
         const result = requestJoinGame(user, socket, roomData);
         expect(result.msg).toBe('all-players');
         expect(result.data).toStrictEqual([user]);
+    });
+
+    test('it adds a user to an existing room', () => {
+        requestJoinGame({name: "existingUser"}, {id: "existingTestId"}, undefined);
+        const user = {name: "test"};
+        const socket = {id: "testId"};
+        const roomData = ["existingTestId"];
+        const result = requestJoinGame(user, socket, roomData);
+        expect(result.msg).toBe('all-players');
+        expect(result.data).toStrictEqual([{name: "existingUser"}, user]);
+    });
+    
+    test('it returns a message if the room is full', () => {
+        const user = {name: "test"};
+        const socket = {id: "testId"};
+        const roomData = new Set(["Test1", "Test2", "Test3", "Test4", "Test5"]);
+        for (const data of roomData) {
+            requestJoinGame({name: data.id}, {id: data}, undefined);
+        }
+        const result = requestJoinGame(user, socket, roomData);
+        expect(result.msg).toBe('room-full');
+    });
+    
+    test('it returns a message if the username is taken', () => {
+        requestJoinGame({name: "takenName"}, {id: "existingTestId"}, undefined);
+        const user = {name: "takenName"};
+        const socket = {id: "testId"};
+        const roomData = ["existingTestId"];
+        const result = requestJoinGame(user, socket, roomData);
+        expect(result.msg).toBe('taken-username');
     });
 });
 

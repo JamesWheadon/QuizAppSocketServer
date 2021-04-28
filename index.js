@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
-        const deletion = disconnect(socket)
+        disconnect(socket)
     });
 
     socket.on('request-join-game', ({ user, room }) => {
