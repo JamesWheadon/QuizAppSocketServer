@@ -31,20 +31,22 @@ io.on('connection', (socket) => {
 
     socket.on('request-join-game', ({ room, username }) => {
         socketUsernames[socket.id] = username;
-        socket.join(room);
 
         const roomData = io.sockets.adapter.rooms.get(room);
+        let roomUsernames = [];
+        for (const user of roomData) {
+            roomUsernames.push(socketUsernames[user]);
+        }
         const inRoomCount = roomData.size;
-        if (inRoomCount > 5) {
-            socket.leave(room);
+        if (inRoomCount == 5) {
             socket.emit('room-full');
         }
+        else if (roomUsernames.contains(username)) {
+            socket.emit('taken-username');
+        }
         else {
-            let roomUsernames = [];
-            for (const user of roomData) {
-                roomUsernames.push(socketUsernames[user]);
-            }
-            io.in(room).emit('all-players', { roomUsernames });
+            socket.join(room);
+            io.in(room).emit('all-players', roomUsernames);
         }
     })
 
