@@ -31,7 +31,6 @@ io.on('connection', (socket) => {
 
     socket.on('request-join-game', ({ user, room }) => {
         socketUsers[socket.id] = user;
-        socket.join(room)
 
         const roomData = io.sockets.adapter.rooms.get(room);
         const inRoomCount = roomData.size
@@ -39,7 +38,17 @@ io.on('connection', (socket) => {
         for (const user of roomData) {
             roomUsers.push(socketUsers[user])
         }
-        io.in(room).emit('all-players',  roomUsers )
+        if (inRoomCount == 5) {
+            socket.emit('room-full');
+        }
+        else if (roomUsers.contains(user)) {
+            socket.emit('taken-username');
+        }
+        else {
+            socket.join(room);
+            io.in(room).emit('all-players',  roomUsers )
+        }
+       
         io.in(room).emit('admin-message', `${inRoomCount} players now in ${room}!`)
     })
 
@@ -47,6 +56,17 @@ io.on('connection', (socket) => {
         const username = socketUsers[socket.id].name;
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
         io.in(room).emit('new-chat-message', { username: username, message: message });
+    })
+
+    socket.on('quiz-start', ({questions, quiz}) => {
+        const room = [...socket.rooms].filter(r => r != socket.id)[0];
+        socket.in(room).emit('quiz-questions', {questions, quiz});
+    })
+
+    socket.on('quiz-finished', (score) => {
+        const username = socketUsers[socket.id];
+        const room = [...socket.rooms].filter(r => r != socket.id)[0];
+        io.in(room).emit('player-score', { username: username, score: score });
     })
 })
 
