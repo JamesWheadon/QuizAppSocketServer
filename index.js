@@ -18,44 +18,39 @@ app.get('/', (req, res) => {
 let socketUsers = {};
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
-    socket.emit('admin-message', 'Hi there, new friend!')
-    socket.broadcast.emit('admin-message', `A new friend has arrived!`)
 
     socket.on('disconnect', () => {
         if (socket.id in socketUsers) {
             delete socketUsers[socket.id];
         }
-        console.log('user disconnected');
     });
 
-    socket.on('request-join-game', ({ user, room }) => {
-        socketUsers[socket.id] = user;
-
+    socket.on('request-join-game', ({ room, user }) => {
         const roomData = io.sockets.adapter.rooms.get(room);
-        const inRoomCount = roomData.size
         let roomUsers = [];
+        let roomUsernames = [];
         for (const user of roomData) {
             roomUsers.push(socketUsers[user])
+            roomUsernames.push(socketUsers[user].name);
         }
+        const inRoomCount = roomData.size;
         if (inRoomCount == 5) {
             socket.emit('room-full');
         }
-        else if (roomUsers.contains(user)) {
+        else if (roomUsernames.contains(user.name)) {
             socket.emit('taken-username');
         }
         else {
+            socketUsers[socket.id] = user;
             socket.join(room);
-            io.in(room).emit('all-players',  roomUsers )
+            io.in(room).emit('all-players', roomUsernames);
         }
-       
-        io.in(room).emit('admin-message', `${inRoomCount} players now in ${room}!`)
     })
 
     socket.on('chat-message', (message) => {
-        const username = socketUsers[socket.id].name;
+        const user = socketUsers[socket.id];
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        io.in(room).emit('new-chat-message', { username: username, message: message });
+        io.in(room).emit('new-chat-message', { username: user.name, message: message });
     })
 
     socket.on('quiz-start', ({questions, quiz}) => {
@@ -64,9 +59,9 @@ io.on('connection', (socket) => {
     })
 
     socket.on('quiz-finished', (score) => {
-        const username = socketUsers[socket.id];
+        const user = socketUsers[socket.id];
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        io.in(room).emit('player-score', { username: username, score: score });
+        io.in(room).emit('player-score', { username: user.name, score: score });
     })
 })
 
