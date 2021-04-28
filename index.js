@@ -42,9 +42,9 @@ io.on('connection', (socket) => {
     })
 
     socket.on('quiz-start', ({ questions, quiz }) => {
-        const startData = quizStart(questions, quiz, socket);
+        const startData = quizStart(socket);
         console.log(startData);
-        socket.in(startData.room).emit(startData.msg, startData.data);
+        socket.in(startData.room).emit(startData.msg, { questions, quiz });
     })
 
     socket.on('quiz-finished', (score) => {

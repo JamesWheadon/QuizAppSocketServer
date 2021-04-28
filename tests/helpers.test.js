@@ -63,3 +63,24 @@ describe('chatMessage', () => {
         expect(result.room).toBe("testRoom");
     });
 });
+
+describe('quizStart', () => {
+    test('it returns an object with the room to emit to', () => {
+        const socket = { rooms: new Set(["testRoom", "testId"]), id: "existingTestId" };
+        const result = quizStart(socket);
+        expect(result.msg).toBe("quiz-questions");
+        expect(result.room).toBe("testRoom");
+    });
+});
+
+describe('quizFinished', () => {
+    test('it returns an object with the room to emit to, finished user name and score', () => {
+        const socket = { rooms: new Set(["testRoom", "testId"]), id: "existingTestId" };
+        const score = 10;
+        const result = quizFinished(score, socket);
+        expect(result.msg).toBe("player-score");
+        expect(result.data.score).toBe(score);
+        expect(result.data.username).toBe("takenName");
+        expect(result.room).toBe("testRoom");
+    });
+});

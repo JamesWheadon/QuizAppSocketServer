@@ -43,9 +43,9 @@ function chatMessage(message, socket) {
     return { msg: 'new-chat-message', data: { username: user.name, message: message }, room: room };
 }
 
-function quizStart(questions, quiz, socket) {
+function quizStart(socket) {
     const room = [...socket.rooms].filter(r => r != socket.id)[0];
-    return { msg: 'quiz-questions', data: { questions, quiz }, room: room };
+    return { msg: 'quiz-questions', room: room };
 }
 
 function quizFinished(score, socket) {
