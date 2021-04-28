@@ -4,7 +4,7 @@ const http = require("http")
 const server = http.createServer(app);
 const socketio = require("socket.io");
 
-const { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } =require('./helper');
+const { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } = require('./helper');
 
 const options = {
     cors: {
@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
-        disconnect(socket)
+        const deletion = disconnect(socket)
     });
 
     socket.on('request-join-game', ({ user, room }) => {

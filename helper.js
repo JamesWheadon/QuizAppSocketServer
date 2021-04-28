@@ -3,6 +3,9 @@ let socketUsers = {};
 function disconnect(socket) {
     if (socket.id in socketUsers) {
         delete socketUsers[socket.id];
+        return true;
+    } else {
+        return false;
     }
 };
 
@@ -51,4 +54,4 @@ function quizFinished(score, socket) {
     return { msg: 'player-score', data: { username: user.name, score: score }, room: room };
 }
 
-module.exports = { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished }
+module.exports = { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished, socketUsers }
