@@ -11,6 +11,10 @@ const options = {
 };
 const io = socketio(server, options);
 
+app.get('/', (req, res) => {
+    res.sendFile('Socket is listening');
+});
+
 let socketUsernames = {};
 
 io.on('connection', (socket) => {
@@ -25,7 +29,7 @@ io.on('connection', (socket) => {
         console.log('user disconnected');
     });
 
-    socket.on('request-join-game', ({room, username}) => {
+    socket.on('request-join-game', ({ room, username }) => {
         socketUsernames[socket.id] = username;
         socket.join(room)
 
@@ -42,10 +46,10 @@ io.on('connection', (socket) => {
     socket.on('chat-message', (message) => {
         const username = socketUsernames[socket.id];
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        io.in(room).emit('new-chat-message', {username: username, message: message});
+        io.in(room).emit('new-chat-message', { username: username, message: message });
     })
 })
 
 const port = process.env.PORT || 5001;
 
-server.listen(port, () => console.log(`Express now departing from port ${port}!`))
+server.listen(port, () => console.log(`Sockets listening on port ${port}!`))
