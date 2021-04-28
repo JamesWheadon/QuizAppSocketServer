@@ -3,10 +3,12 @@ const app = express();
 const http = require("http")
 const server = http.createServer(app);
 const socketio = require("socket.io");
+
+const { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } = require('./helper');
+
 const options = {
     cors: {
-        origin: "http://localhost:8080",
-        methods: ["GET", "POST"]
+        origin: "http://localhost:8080"
     }
 };
 const io = socketio(server, options);
@@ -15,63 +17,40 @@ app.get('/', (req, res) => {
     res.send('Socket is listening');
 });
 
-let socketUsers = {};
-
 io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
-        if (socket.id in socketUsers) {
-            delete socketUsers[socket.id];
-        }
+        disconnect(socket)
     });
 
     socket.on('request-join-game', ({ user, room }) => {
-        console.log(room, user)
         const roomData = io.sockets.adapter.rooms.get(room);
-        let roomUsers = [];
-        if (roomData) {
-            let roomUsernames = [];
-            for (const user of roomData) {
-                roomUsers.push(socketUsers[user])
-                roomUsernames.push(socketUsers[user].name);
-            }
-            const inRoomCount = roomData.size;
-            if (inRoomCount == 5) {
-                socket.emit('room-full');
-            }
-            else if (roomUsernames.includes(user.name)) {
-                socket.emit('taken-username');
-            }
-            else {
-                socketUsers[socket.id] = user;
-                roomUsers.push(user)
-                socket.join(room);
-                io.in(room).emit('all-players', roomUsers);
-            }
-        }
-        else {
-            socketUsers[socket.id] = user;
+        const joinData = requestJoinGame(user, socket, roomData);
+        console.log(joinData)
+        if (joinData.data) {
             socket.join(room);
-            roomUsers = [user];
-            io.in(room).emit('all-players', roomUsers);
+            io.in(room).emit(joinData.msg, joinData.data)
+        } else {
+            socket.emit(joinData.msg);
         }
     })
 
     socket.on('chat-message', (message) => {
-        const user = socketUsers[socket.id];
-        const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        io.in(room).emit('new-chat-message', { username: user.name, message: message });
+        const messageData = chatMessage(message, socket);
+        console.log(messageData);
+        io.in(messageData.room).emit(messageData.msg, messageData.data);
     })
 
     socket.on('quiz-start', ({ questions, quiz }) => {
-        const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        socket.in(room).emit('quiz-questions', { questions, quiz });
+        const startData = quizStart(socket);
+        console.log(startData);
+        socket.in(startData.room).emit(startData.msg, { questions, quiz });
     })
 
     socket.on('quiz-finished', (score) => {
-        const user = socketUsers[socket.id];
-        const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        io.in(room).emit('player-score', { username: user.name, score: score });
+        const finishedData = quizFinished(score, socket);
+        console.log(finishedData);
+        io.in(finishedData.room).emit(finishedData.msg, finishedData.data);
     })
 })
 
