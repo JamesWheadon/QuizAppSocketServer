@@ -79,8 +79,7 @@ describe('quizFinished', () => {
         const score = 10;
         const result = quizFinished(score, socket);
         expect(result.msg).toBe("player-score");
-        expect(result.data.score).toBe(score);
-        expect(result.data.username).toBe("takenName");
+        expect(result.data.name).toBe("takenName");
         expect(result.room).toBe("testRoom");
     });
 });
