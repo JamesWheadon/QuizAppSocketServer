@@ -68,10 +68,10 @@ io.on('connection', (socket) => {
         socket.in(room).emit('quiz-questions', { questions, quiz });
     })
 
-    socket.on('quiz-finished', (score) => {
+    socket.on('finish-quiz', () => {
         const user = socketUsers[socket.id];
         const room = [...socket.rooms].filter(r => r != socket.id)[0];
-        io.in(room).emit('player-score', { username: user.name, score: score });
+        io.in(room).emit('player-done', user);
     })
 })
 
