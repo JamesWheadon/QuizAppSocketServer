@@ -51,7 +51,7 @@ function quizStart(socket) {
 function quizFinished(score, socket) {
     const user = socketUsers[socket.id];
     const room = [...socket.rooms].filter(r => r != socket.id)[0];
-    return { msg: 'player-score', data: { username: user.name, score: score }, room: room };
+    return { msg: 'player-score', data: user, room: room };
 }
 
 module.exports = { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished, socketUsers }
