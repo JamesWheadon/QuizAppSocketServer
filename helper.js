@@ -48,8 +48,7 @@ function quizStart(socket) {
     return { msg: 'quiz-questions', room: room };
 }
 
-function quizFinished(score, socket) {
-    const user = socketUsers[socket.id];
+function quizFinished(user, socket) {
     const room = [...socket.rooms].filter(r => r != socket.id)[0];
     return { msg: 'player-score', data: user, room: room };
 }

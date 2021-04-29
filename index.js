@@ -47,8 +47,8 @@ io.on('connection', (socket) => {
         socket.in(startData.room).emit(startData.msg, { questions, quiz });
     })
 
-    socket.on('quiz-finished', (score) => {
-        const finishedData = quizFinished(score, socket);
+    socket.on('quiz-finished', (user) => {
+        const finishedData = quizFinished(user, socket);
         console.log(finishedData);
         io.in(finishedData.room).emit(finishedData.msg, finishedData.data);
     })
