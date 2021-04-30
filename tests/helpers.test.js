@@ -79,7 +79,6 @@ describe('quizFinished', () => {
         const score = 10;
         const result = quizFinished(score, socket);
         expect(result.msg).toBe("player-score");
-        expect(result.data.name).toBe("takenName");
         expect(result.room).toBe("testRoom");
     });
 });
