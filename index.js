@@ -8,7 +8,7 @@ const { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } = re
 
 const options = {
     cors: {
-        origin: "http://localhost:8080"
+        origin: "https://quizards.netlify.app"
     }
 };
 const io = socketio(server, options);
