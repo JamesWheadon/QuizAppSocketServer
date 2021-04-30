@@ -8,7 +8,7 @@ const { disconnect, requestJoinGame, chatMessage, quizStart, quizFinished } = re
 
 const options = {
     cors: {
-        origin: "http://localhost:8080"
+        origin: *
     }
 };
 const io = socketio(server, options);
